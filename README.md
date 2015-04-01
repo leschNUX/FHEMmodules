@@ -1,2 +1,2 @@
 # FHEMmodules
-My FHEM modules or the own I modified
+My FHEM modules or the ones I modified
