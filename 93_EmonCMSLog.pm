@@ -1,6 +1,6 @@
 ###############################################################
 #
-# $Id: 93_EmonCMSLog.pm 2013-12-17 playwithfree $
+# $Id: 93_EmonCMSLog.pm 2014-05-03 playwithfree $
 # Initial version by Fuzzy http://forum.fhem.de/index.php/topic,11472.0.html
 #
 ###############################################################
@@ -177,25 +177,33 @@ sub EmonCMSLog_Log($$) {
 		my $emon_url =
 		  $log->{BASEURL}."/input/post?json={$inputs}\&apikey=$key";
                 Log3 $log->{NAME}, 5, "EmonCMSLog [$log->{NAME}]: $emon_url";
-		my $emon_ua = LWP::UserAgent->new;
-		$emon_ua->timeout(3);
-		my $emon_res = $emon_ua->get($emon_url);
-		if ( $emon_res->is_error ) {
-			Log3 $log->{NAME}, 1,
-			  (     "EmonCMSLog => Update[" 
-				  . $n
-				  . "] ERROR: "
-				  . ( $emon_res->as_string )
-				  . "\n" );
-		} elsif ($emon_res->as_string !~ /\nok/ ) {
-                        Log3 $log->{NAME}, 1, "EmonCMSLog [$log->{NAME}]: $emon_url";
-			Log3 $log->{NAME}, 1,
-			  (     "EmonCMSLog => Update[" 
-				  . $n
-				  . "] RETURN: "
-				  . ( $emon_res->as_string )
-				  . "\n" );
-                }
+#		my $emon_ua = LWP::UserAgent->new;
+#		$emon_ua->timeout(3);
+#		my $emon_res = $emon_ua->get($emon_url);
+		my $hash = { url => $emon_url,
+		  callback=>sub($$$){ Log 5,"$emon_url\nERR:$_[1] DATA:$_[2]" },
+		};
+		my ($err, $ret) = HttpUtils_NonblockingGet($hash);
+		if($err) {
+		  Log3 undef, $hash->{loglevel}, "CustomGetFileFromURL $err";
+		}
+
+#		if ( $emon_res->is_error ) {
+#			Log3 $log->{NAME}, 1,
+#			  (     "EmonCMSLog => Update[" 
+#				  . $n
+#				  . "] ERROR: "
+#				  . ( $emon_res->as_string )
+#				  . "\n" );
+#		} elsif ($emon_res->as_string !~ /\nok/ ) {
+#                        Log3 $log->{NAME}, 1, "EmonCMSLog [$log->{NAME}]: $emon_url";
+#			Log3 $log->{NAME}, 1,
+#			  (     "EmonCMSLog => Update[" 
+#				  . $n
+#				  . "] RETURN: "
+#				  . ( $emon_res->as_string )
+#				  . "\n" );
+#                }
 	}
 	
     return "";
